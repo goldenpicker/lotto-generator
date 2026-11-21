@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>커스텀 황금 패턴 로또 생성기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+    }
+
+    body {
+      background-color: #f2f4f8;
+      color: #191f28;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: #ffffff;
+      border-radius: 22px;
+      padding: 28px 22px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+      text-align: center;
+    }
+
+    .badge-top {
+      display: inline-block;
+      background: #e8f3ff;
+      color: #1b64da;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 1.48rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: #191f28;
+    }
+
+    .subtitle {
+      font-size: 0.88rem;
+      color: #4e5968;
+      margin-bottom: 18px;
+      line-height: 1.45;
+    }
+
+    /* 네모 박스형 필터 섹션 */
+    .filter-box {
+      background: #f9fafb;
+      border: 1px solid #e5e8eb;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 0 2px;
+    }
+
+    .filter-header strong {
+      color: #191f28;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .filter-status {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #3182f6;
+      background: #e8f3ff;
+      padding: 3px 9px;
+      border-radius: 999px;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 9px;
+    }
+
+    .filter-tile {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 68px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1.5px solid #3182f6;
+      background-color: #eef6ff;
+      color: #191f28;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.08s ease, background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    }
+
+    .filter-tile:active {
+      transform: scale(0.97);
+    }
+
+    .filter-tile.off {
+      border: 1.5px dashed #cbd2d9;
+      background-color: #ffffff;
+      opacity: 0.72;
+    }
+
+    .tile-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .tile-name {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #191f28;
+    }
+
+    .tile-badge {
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background-color: #3182f6;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+
+    .filter-tile.off .tile-badge {
+      background-color: #e5e8eb;
+      color: #6b7684;
+    }
+
+    .tile-desc {
+      font-size: 0.72rem;
+      color: #4e5968;
+      line-height: 1.25;
+    }
+
+    .ad-slot {
+      width: 100%;
+      height: 60px;
+      background-color: #f9fafb;
+      border: 1px dashed #d1d6db;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: #8b95a1;
+      margin-bottom: 20px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      flex: 1;
+      padding: 13px 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.1s ease, background-color 0.2s ease;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background-color: #3182f6;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: #1b64da;
+    }
+
+    .btn-secondary {
+      background-color: #e8f3ff;
+      color: #3182f6;
+    }
+
+    .btn-secondary:hover {
+      background-color: #d0e5ff;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 0 2px;
+    }
+
+    .result-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #333d4b;
+    }
+
+    .btn-copy-all {
+      flex: none;
+      padding: 7px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background-color: #191f28;
+      color: #ffffff;
+      border-radius: 9px;
+    }
+
+    .btn-copy-all:hover {
+      background-color: #333d4b;
+    }
+
+    .result-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .game-card {
+      background: #f9fafb;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid #e5e8eb;
+      animation: fadeIn 0.25s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .game-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 9px;
+    }
+
+    .game-label {
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: #3182f6;
+      width: 22px;
+      text-align: left;
+    }
+
+    .balls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .ball {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: #ffffff;
+      box-shadow: inset -2px -2px 4px rgba(0, 0, 0, 0.18);
+    }
+
+    .ball-yellow { background-color: #fbc400; color: #191f28; }
+    .ball-blue   { background-color: #69c8f2; }
+    .ball-red    { background-color: #ff7272; }
+    .ball-gray   { background-color: #8b95a1; }
+    .ball-green  { background-color: #b0d840; color: #191f28; }
+
+    .copy-btn {
+      flex: none;
+      padding: 5px 10px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      background-color: #ffffff;
+      color: #4e5968;
+      border: 1px solid #d1d6db;
+      border-radius: 8px;
+    }
+
+    .copy-btn:hover {
+      background-color: #f2f4f6;
+    }
+
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      font-size: 0.74rem;
+      color: #6b7684;
+      background: #ffffff;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #e5e8eb;
+    }
+
+    .stats-bar span b {
+      color: #191f28;
+      font-weight: 700;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      background: rgba(25, 31, 40, 0.92);
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <span class="badge-top">🟦 원터치 네모 필터 스위치</span>
+    <h1>황금 패턴 로또 번호 생성기</h1>
+    <p class="subtitle">네모 박스를 눌러 필터를 켰다 껐다 하면서<br>나만의 조건으로 번호를 뽑아보세요.</p>
+
+    <div class="filter-box">
+      <div class="filter-header">
+        <strong>⚙️ 통계 필터 네모 스위치</strong>
+        <span id="filterStatus" class="filter-status">5개 ON</span>
+      </div>
+
+      <div class="filter-grid">
+        <div class="filter-tile" data-filter="sum" onclick="toggleFilterTile(this)">
+          <div class="tile-top">
+            <span class="tile-name">총합 구간</span>
+            <span class="tile-badge">ON</span>
+          </div>
+          <span class="tile-desc">6개 합 100~175</span>
+        </div>
+
+        <div class="filter-tile" data-filter="oddEven" onclick="toggleFilterTile(this)">
+          <div class="tile-top">
+            <span class="tile-name">홀짝 균형</span>
+            <span class="tile-badge">ON</span>
+          </div>
+          <span class="tile-desc">2:4 ~ 4:2 비율</span>
+        </div>
+
+        <div class="filter-tile" data-filter="lowHigh" onclick="toggleFilterTile(this)">
+          <div class="tile-top">
+            <span class="tile-name">고저 균형</span>
+            <span class="tile-badge">ON</span>
+          </div>
+          <span class="tile-desc">1~22 / 23~45 균형</span>
+        </div>
+
+        <div class="filter-tile" data-filter="consecutive" onclick="toggleFilterTile(this)">
+          <div class="tile-top">
+            <span class="tile-name">3연번 제외</span>
+            <span class="tile-badge">ON</span>
+          </div>
+          <span class="tile-desc">연속 3개 이상 제외</span>
+        </div>
+
+        <div class="filter-tile" data-filter="lastDigit" onclick="toggleFilterTile(this)">
+          <div class="tile-top">
+            <span class="tile-name">동끝수 제한</span>
+            <span class="tile-badge">ON</span>
+          </div>
+          <span class="tile-desc">같은 끝자리 3개+ 제외</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ad-slot">광고 배너 영역 (예: 320x50 / 반응형)</div>
+
+    <div class="controls">
+      <button class="btn-secondary" onclick="generateGames(1)">1조합 뽑기</button>
+      <button class="btn-primary" onclick="generateGames(5)">5조합 엄선하기</button>
+    </div>
+
+    <div class="result-header">
+      <span id="resultTitle" class="result-title">추천 조합 목록</span>
+      <button class="btn-copy-all" onclick="copyAllGames()">📋 전체 복사</button>
+    </div>
+
+    <div id="resultList" class="result-list"></div>
+  </div>
+
+  <div id="toast" class="toast">복사되었습니다!</div>
+
+  <script>
+    const labels = ["A", "B", "C", "D", "E"];
+    let currentGames = [];
+
+    const filterState = {
+      sum: true,
+      oddEven: true,
+      lowHigh: true,
+      consecutive: true,
+      lastDigit: true
+    };
+
+    const filterLabels = {
+      sum: "총합 100~175",
+      oddEven: "홀짝 균형",
+      lowHigh: "고저 균형",
+      consecutive: "3연번 제외",
+      lastDigit: "동끝수 제한"
+    };
+
+    function toggleFilterTile(tileEl) {
+      const key = tileEl.getAttribute("data-filter");
+      filterState[key] = !filterState[key];
+
+      const isOn = filterState[key];
+      tileEl.classList.toggle("off", !isOn);
+      const badgeEl = tileEl.querySelector(".tile-badge");
+      badgeEl.textContent = isOn ? "ON" : "OFF";
+
+      updateFilterStatus();
+    }
+
+    function getActiveFilterNames() {
+      return Object.keys(filterState)
+        .filter((key) => filterState[key])
+        .map((key) => filterLabels[key]);
+    }
+
+    function updateFilterStatus() {
+      const activeCount = getActiveFilterNames().length;
+      const statusEl = document.getElementById("filterStatus");
+
+      if (activeCount === 0) {
+        statusEl.textContent = "전체 OFF (랜덤)";
+        statusEl.style.background = "#f2f4f6";
+        statusEl.style.color = "#4e5968";
+      } else {
+        statusEl.textContent = `${activeCount}개 ON`;
+        statusEl.style.background = "#e8f3ff";
+        statusEl.style.color = "#3182f6";
+      }
+    }
+
+    function drawRawNumbers() {
+      const set = new Set();
+      while (set.size < 6) {
+        set.add(Math.floor(Math.random() * 45) + 1);
+      }
+      return Array.from(set).sort((a, b) => a - b);
+    }
+
+    function analyzeCombination(nums, state) {
+      const sum = nums.reduce((acc, n) => acc + n, 0);
+      if (state.sum && (sum < 100 || sum > 175)) return null;
+
+      const oddCount = nums.filter((n) => n % 2 === 1).length;
+      const evenCount = 6 - oddCount;
+      if (state.oddEven && (oddCount < 2 || oddCount > 4)) return null;
+
+      const lowCount = nums.filter((n) => n <= 22).length;
+      const highCount = 6 - lowCount;
+      if (state.lowHigh && (lowCount < 2 || lowCount > 4)) return null;
+
+      let consecutivePairs = 0;
+      let streak = 1;
+      for (let i = 1; i < nums.length; i++) {
+        if (nums[i] === nums[i - 1] + 1) {
+          streak++;
+          consecutivePairs++;
+          if (state.consecutive && streak >= 3) return null;
+        } else {
+          streak = 1;
+        }
+      }
+      if (state.consecutive && consecutivePairs > 2) return null;
+
+      const lastDigitCounts = {};
+      let maxSameLastDigit = 0;
+      for (const n of nums) {
+        const last = n % 10;
+        lastDigitCounts[last] = (lastDigitCounts[last] || 0) + 1;
+        if (lastDigitCounts[last] > maxSameLastDigit) {
+          maxSameLastDigit = lastDigitCounts[last];
+        }
+      }
+      if (state.lastDigit && maxSameLastDigit >= 3) return null;
+
+      return {
+        nums,
+        sum,
+        oddEven: `${oddCount}:${evenCount}`,
+        lowHigh: `${lowCount}:${highCount}`,
+        consecutiveText: consecutivePairs === 0 ? "연번 없음" : `연번 ${consecutivePairs}쌍`
+      };
+    }
+
+    function getFilteredLotto(state) {
+      let result = null;
+      let safetyCount = 0;
+      while (!result && safetyCount < 5000) {
+        const candidate = drawRawNumbers();
+        result = analyzeCombination(candidate, state);
+        safetyCount++;
+      }
+      return result;
+    }
+
+    function getBallColorClass(num) {
+      if (num <= 10) return "ball-yellow";
+      if (num <= 20) return "ball-blue";
+      if (num <= 30) return "ball-red";
+      if (num <= 40) return "ball-gray";
+      return "ball-green";
+    }
+
+    function formatSingleShareText(label, data) {
+      return `${label} | ${data.nums.join(", ")} (합:${data.sum} · 홀짝:${data.oddEven} · ${data.consecutiveText})`;
+    }
+
+    function formatAllShareText(games) {
+      const filters = getActiveFilterNames();
+      const filterSummary = filters.length > 0 ? filters.join(", ") : "전체 OFF (완전 랜덤)";
+      const lines = games.map((g, idx) => formatSingleShareText(labels[idx] || `${idx + 1}`, g));
+
+      return [
+        `🍀 [황금 패턴 로또 추천 · ${games.length}조합]`,
+        `⚙️ 적용 조건: ${filterSummary}`,
+        `───────────────`,
+        ...lines,
+        `───────────────`,
+        `이번 주 1등 기원! ✨`
+      ].join("\n");
+    }
+
+    function generateGames(count) {
+      const resultList = document.getElementById("resultList");
+      const resultTitle = document.getElementById("resultTitle");
+      resultList.innerHTML = "";
+      currentGames = [];
+
+      for (let i = 0; i < count; i++) {
+        const data = getFilteredLotto(filterState);
+        if (!data) continue;
+
+        currentGames.push(data);
+
+        const card = document.createElement("div");
+        card.className = "game-card";
+        card.style.animationDelay = `${i * 0.05}s`;
+
+        const ballsHtml = data.nums
+          .map((num) => `<span class="ball ${getBallColorClass(num)}">${num}</span>`)
+          .join("");
+
+        const singleShareText = formatSingleShareText(labels[i], data);
+
+        card.innerHTML = `
+          <div class="game-top">
+            <span class="game-label">${labels[i]}</span>
+            <div class="balls">${ballsHtml}</div>
+            <button class="copy-btn" onclick="copyText(decodeURIComponent('${encodeURIComponent(singleShareText)}'), '${labels[i]}조합이 복사되었습니다!')">복사</button>
+          </div>
+          <div class="stats-bar">
+            <span>총합 <b>${data.sum}</b></span>
+            <span>·</span>
+            <span>홀짝 <b>${data.oddEven}</b></span>
+            <span>·</span>
+            <span>고저 <b>${data.lowHigh}</b></span>
+            <span>·</span>
+            <span><b>${data.consecutiveText}</b></span>
+          </div>
+        `;
+
+        resultList.appendChild(card);
+      }
+
+      resultTitle.textContent = `추천 조합 목록 (${currentGames.length}게임)`;
+    }
+
+    function copyAllGames() {
+      if (currentGames.length === 0) return;
+      const fullText = formatAllShareText(currentGames);
+      copyText(fullText, `전체 ${currentGames.length}조합이 복사되었습니다!`);
+    }
+
+    function copyText(text, message = "복사되었습니다!") {
+      navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 1800);
+      });
+    }
+
+    window.onload = () => {
+      updateFilterStatus();
+      generateGames(5);
+    };
+  </script>
+
+</body>
+</html>
